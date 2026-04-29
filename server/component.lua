@@ -208,7 +208,7 @@ RegisterServerEvent("Camara:CapturePhoto", function()
 			tostring(GetConvar("evidence_selfie_webhook", "")),
 			options,
 			{
-				username = "SandboxRP Evidence",
+				username = "Pulsar Framework Evidence",
 				avatar_url = "https://i.ibb.co/1Yg16pK/icon.png",
 				content = "",
 				embeds = {
@@ -220,7 +220,7 @@ RegisterServerEvent("Camara:CapturePhoto", function()
 							char:GetData("Last")
 						),
 						author = {
-							name = "SandboxRP Evidence",
+							name = "Pulsar Framework Evidence",
 							icon_url = "https://i.ibb.co/1Yg16pK/icon.png",
 						},
 						footer = {

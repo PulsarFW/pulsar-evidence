@@ -5,8 +5,8 @@ client_script("@pulsar-core/exports/cl_error.lua")
 client_script("@pulsar-pwnzor/client/check.lua")
 server_script("@oxmysql/lib/MySQL.lua")
 
-description("Sandbox RP Framework Evidence System")
-name("Sandbox RP Framework: pulsar-evidence")
+description("Pulsar Framework Evidence System")
+name("Pulsar Framework: pulsar-evidence")
 author("Dr Nick")
 version("v1.0.0")
 
