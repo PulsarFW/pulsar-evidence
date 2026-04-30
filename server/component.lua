@@ -203,12 +203,13 @@ RegisterServerEvent("Camara:CapturePhoto", function()
 			quality = 0.8,
 		}
 
+		local webhookUsername = GetConvar("evidence_webhook_username", "Evidence Camera")
 		exports["discord-screenshot"]:requestCustomClientScreenshotUploadToDiscord(
 			src,
 			tostring(GetConvar("evidence_selfie_webhook", "")),
 			options,
 			{
-				username = "Pulsar Framework Evidence",
+				username = webhookUsername,
 				avatar_url = "https://i.ibb.co/1Yg16pK/icon.png",
 				content = "",
 				embeds = {
@@ -220,7 +221,7 @@ RegisterServerEvent("Camara:CapturePhoto", function()
 							char:GetData("Last")
 						),
 						author = {
-							name = "Pulsar Framework Evidence",
+							name = webhookUsername,
 							icon_url = "https://i.ibb.co/1Yg16pK/icon.png",
 						},
 						footer = {
