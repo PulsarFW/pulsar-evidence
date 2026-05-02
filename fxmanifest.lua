@@ -8,7 +8,7 @@ server_script("@oxmysql/lib/MySQL.lua")
 description("Pulsar Framework Evidence System")
 name("Pulsar Framework: pulsar-evidence")
 author("Dr Nick")
-version("v1.0.2")
+version "1.0.3"
 repository("https://www.github.com/PulsarFW/pulsar-evidence")
 server_scripts({
   '@oxmysql/lib/MySQL.lua',
