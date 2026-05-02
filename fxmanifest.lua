@@ -1,5 +1,5 @@
 fx_version("cerulean")
-games({ "gta5" }) 
+games({ "gta5" })
 lua54("yes")
 client_script("@pulsar-core/exports/cl_error.lua")
 client_script("@pulsar-pwnzor/client/check.lua")
@@ -8,17 +8,17 @@ server_script("@oxmysql/lib/MySQL.lua")
 description("Pulsar Framework Evidence System")
 name("Pulsar Framework: pulsar-evidence")
 author("Dr Nick")
-version("v1.0.0")
-
+version("v1.0.2")
+repository("https://www.github.com/PulsarFW/pulsar-evidence")
 server_scripts({
-	'@oxmysql/lib/MySQL.lua',
-	"server/**/*.lua",
+  '@oxmysql/lib/MySQL.lua',
+  "server/**/*.lua",
 })
 
 client_scripts({
-	"client/**/*.lua",
+  "client/**/*.lua",
 })
 
 shared_scripts({
-	"shared/**/*.lua",
+  "shared/**/*.lua",
 })
