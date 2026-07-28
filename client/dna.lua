@@ -1,8 +1,8 @@
 _withinDNATesting = true
 
 RegisterNetEvent("Evidence:Client:RanDNA", function(tooDegraded, success, evidenceId)
-	exports['pulsar-animations']:EmotesPlay("type3", false, 5500, true, true)
-	exports['pulsar-hud']:Progress({
+	plsr.Animations.Emotes:Play("type3", false, 5500, true, true)
+	plsr.Progress:Progress({
 		name = "dna_test",
 		duration = 5000,
 		label = "Running DNA Through Database",
@@ -18,12 +18,12 @@ RegisterNetEvent("Evidence:Client:RanDNA", function(tooDegraded, success, eviden
 	}, function(status)
 		if not status then
 			if tooDegraded then
-				return exports["pulsar-hud"]:Notification("error", "DNA too Degraded to Run")
+				return plsr.Notification:Error("DNA too Degraded to Run")
 			end
 			if success then
-				exports["pulsar-hud"]:Notification("success", "DNA Match Found")
+				plsr.Notification:Success("DNA Match Found")
 
-				exports['pulsar-hud']:ListMenuShow({
+				plsr.ListMenu:Show({
 					main = {
 						label = "DNA Comparison Results",
 						items = {
@@ -44,16 +44,16 @@ RegisterNetEvent("Evidence:Client:RanDNA", function(tooDegraded, success, eviden
 					},
 				})
 			else
-				exports["pulsar-hud"]:Notification("error", "Could Not Match DNA")
+				plsr.Notification:Error("Could Not Match DNA")
 			end
 		end
 	end)
 end)
 
 AddEventHandler("Polyzone:Enter", function(id, point, insideZone, data)
-	if data and data.dna and (LocalPlayer.state.onDuty == "police" or LocalPlayer.state.onDuty == "ems") then
+	if data and data.dna and (plsr.State.flags.onDuty == "police" or plsr.State.flags.onDuty == "ems") then
 		_withinDNATesting = true
-		exports['pulsar-hud']:ActionShow("dna", "{key}Use DNA Evidence{/key} Run DNA Sample")
+		plsr.Action:Show("dna", "{key}Use DNA Evidence{/key} Run DNA Sample")
 	end
 end)
 
@@ -62,9 +62,9 @@ AddEventHandler("Polyzone:Exit", function(id, point, insideZone, data)
 		_withinDNATesting
 		and data
 		and data.dna
-		and (LocalPlayer.state.onDuty == "police" or LocalPlayer.state.onDuty == "ems")
+		and (plsr.State.flags.onDuty == "police" or plsr.State.flags.onDuty == "ems")
 	then
 		_withinDNATesting = false
-		exports['pulsar-hud']:ActionHide("dna")
+		plsr.Action:Hide("dna")
 	end
 end)

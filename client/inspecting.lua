@@ -6,8 +6,8 @@ local fetchedEvidenceCache, nearbyEvidence = {}, {}
 local function filterNearbyEvidence(evidence)
 	local nearby = {}
 
-	local coords = GetEntityCoords(LocalPlayer.state.ped)
-	local myRoute = LocalPlayer.state.currentRoute
+	local coords = GetEntityCoords(PlayerPedId())
+	local myRoute = plsr.State.flags.currentRoute
 
 	for k, v in ipairs(evidence) do
 		if v and myRoute == v.route and #(coords - v.coords) <= 50.0 then
@@ -25,8 +25,8 @@ local evidenceMarkers = {
 	paint_fragment = { label = "Paint Fragment", marker = 36, scale = 0.2, textZOffset = 0.2 },
 }
 
-AddEventHandler('ox_inventory:currentWeapon', function(currentWeapon)
-	if currentWeapon and currentWeapon.name == "WEAPON_FLASHLIGHT" then
+AddEventHandler("Weapons:Client:SwitchedWeapon", function(weapon)
+	if weapon == "WEAPON_FLASHLIGHT" then
 		ignoreFreeAim = false
 		StartInspecting()
 	else
@@ -45,14 +45,14 @@ end)
 
 AddEventHandler("Keybinds:Client:KeyUp:secondary_action", function()
 	if inspecting and ignoreFreeAim then
-		if LocalPlayer.state.onDuty == "police" then
+		if plsr.State.flags.onDuty == "police" then
 			TriggerServerEvent("Camara:CapturePhoto")
 		end
 	end
 end)
 
 function CanSeeEvidence()
-	return (IsPlayerFreeAiming(LocalPlayer.state.PlayerID) or ignoreFreeAim)
+	return (IsPlayerFreeAiming(plsr.State.flags.PlayerID) or ignoreFreeAim)
 end
 
 function StartInspecting()
@@ -60,21 +60,20 @@ function StartInspecting()
 		inspecting = true
 		fetchedEvidenceCache = FetchEvidence()
 		nearbyEvidence = filterNearbyEvidence(fetchedEvidenceCache)
-		local NotifyStr = string.format("Camera - Press %s to exit", exports["pulsar-kbs"]:GetKey("emote_cancel"))
-		if LocalPlayer.state.onDuty == "police" then
-			NotifyStr = string.format("Camera - Press %s to take a photo",
-					exports["pulsar-kbs"]:GetKey("secondary_action"))
+		local NotifyStr = string.format("Camera - Press %s to exit", plsr.Keybinds:GetKey("emote_cancel"))
+		if plsr.State.flags.onDuty == "police" then
+			NotifyStr = string.format("Camera - Press %s to take a photo", plsr.Keybinds:GetKey("secondary_action"))
 				.. "<br/>"
-				.. string.format("Camera - Press %s to exit", exports["pulsar-kbs"]:GetKey("emote_cancel"))
+				.. string.format("Camera - Press %s to exit", plsr.Keybinds:GetKey("emote_cancel"))
 		end
 		if ignoreFreeAim then
-			exports["pulsar-hud"]:Notification("info", NotifyStr, -1, "camera", nil, "camera-info-notif2")
+			plsr.Notification.Persistent:Info("camera-info-notif2", NotifyStr, "camera")
 		end
 		CreateThread(function()
 			while inspecting do
 				if CanSeeEvidence() then
 					for k, v in ipairs(nearbyEvidence) do
-						if #(GetEntityCoords(LocalPlayer.state.ped) - v.coords) <= 8.0 then
+						if #(GetEntityCoords(PlayerPedId()) - v.coords) <= 8.0 then
 							if v.type == "paint_fragment" then
 								DrawMarker(
 									evidenceMarkers[v.type].marker,
@@ -178,7 +177,7 @@ function StartInspecting()
 end
 
 function StopInspecting()
-	exports["pulsar-hud"]:Notification("remove", nil, nil, nil, nil, "camera-info-notif2")
+	plsr.Notification.Persistent:Remove("camera-info-notif2")
 	if inspecting then
 		inspecting = false
 	end
@@ -186,7 +185,7 @@ end
 
 function FetchEvidence()
 	local p = promise.new()
-	exports["pulsar-core"]:ServerCallback("Evidence:Fetch", {}, function(evidence)
+	plsr.Callbacks:ServerCallback("Evidence:Fetch", {}, function(evidence)
 		p:resolve(evidence)
 	end)
 
@@ -195,7 +194,7 @@ end
 
 function PickupClosestEvidence(localEvidence)
 	if #localEvidence > 0 then
-		local hitting, endCoords, entity = GetEntityPlayerIsLookingAt(15.0, LocalPlayer.state.ped)
+		local hitting, endCoords, entity = GetEntityPlayerIsLookingAt(15.0, PlayerPedId())
 		if hitting and endCoords then
 			local closest, lastDist
 
@@ -208,14 +207,14 @@ function PickupClosestEvidence(localEvidence)
 			end
 
 			if closest and lastDist <= 1.75 then
-				if LocalPlayer.state.onDuty == "police" then
-					exports['pulsar-animations']:EmotesPlay("pickup", false, false, true, true)
+				if plsr.State.flags.onDuty == "police" then
+					plsr.Animations.Emotes:Play("pickup", false, false, true, true)
 					TriggerServerEvent("Evidence:Server:PickupEvidence", closest)
 					-- else
 					--     print('Destroy Evidence')
 				end
 			else
-				exports["pulsar-hud"]:Notification("error", "Not Close Enough to Any Evidence")
+				plsr.Notification:Error("Not Close Enough to Any Evidence")
 			end
 		end
 	end

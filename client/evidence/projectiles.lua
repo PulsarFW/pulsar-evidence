@@ -1,3 +1,6 @@
+-- component.lua's glob load order isn't guaranteed, so guard against it running first.
+LOCAL_CACHED_EVIDENCE = LOCAL_CACHED_EVIDENCE or {}
+
 local hasWeapon = false
 local currentWeapon, currentWeaponData, currentWeaponAmmo
 
@@ -5,16 +8,9 @@ local function generateRandomness()
     return math.random(-145, 145) / 100
 end
 
-AddEventHandler('ox_inventory:currentWeapon', function(currentWeapon)
-    if currentWeapon then
-        local weapon = currentWeapon.name
-        local weaponData = currentWeapon.metadata or {}
-        
-        if weapon and currentWeapon.metadata and currentWeapon.metadata.durability then
-            StartHoldingWeapon(weapon, weaponData, currentWeapon)
-        else
-            StopHoldingWeapon()
-        end
+AddEventHandler('Weapons:Client:SwitchedWeapon', function(weapon, weaponData, weaponItemData)
+    if weapon and weaponItemData and weaponItemData.gun then
+        StartHoldingWeapon(weapon, weaponData, weaponItemData)
     else
         StopHoldingWeapon()
     end
@@ -23,32 +19,24 @@ end)
 function StartHoldingWeapon(weapon, weaponData, weaponItemData)
     currentWeapon = weapon
     currentWeaponData = weaponData
-
-    local ammoItem = weaponItemData.ammo or weaponItemData.ammoname or weaponItemData.ammoType
-    if ammoItem and type(ammoItem) == "string" then
-        currentWeaponAmmo = string.upper(string.gsub(ammoItem, "-", "_"))
-    else
-        currentWeaponAmmo = 'UNKNOWN'
-    end
+    currentWeaponAmmo = weaponItemData.ammoType or 'UNKNOWN'
 
     if not hasWeapon then
         hasWeapon = true
         CreateThread(function()
             while hasWeapon do
-                if IsPedShooting(LocalPlayer.state.ped) then
-                    local casingPosition = GetOffsetFromEntityInWorldCoords(LocalPlayer.state.ped, generateRandomness(),
-                        generateRandomness(), VEHICLE_INSIDE and 0.0 or -0.9)
+                if IsPedShooting(PlayerPedId()) then
+                    -- Generate Randomness (Simulate Dropping and make sure they don't all stack ontop of eachother)
+                    local casingPosition = GetOffsetFromEntityInWorldCoords(PlayerPedId(), generateRandomness(), generateRandomness(), VEHICLE_INSIDE and 0.0 or -0.9)
 
                     table.insert(LOCAL_CACHED_EVIDENCE, {
                         type = 'casing',
-                        route = LocalPlayer.state.currentRoute,
+                        route = plsr.State.flags.currentRoute,
                         coords = casingPosition,
                         data = {
                             weapon = {
                                 name = currentWeapon,
-                                serial = currentWeaponData.serial or 
-                                    currentWeaponData.SerialNumber or
-                                    currentWeaponData.ScratchedSerialNumber,
+                                serial = currentWeaponData.MetaData.SerialNumber or currentWeaponData.MetaData.ScratchedSerialNumber,
                                 ammoType = currentWeaponAmmo,
                                 ammoTypeName = _ammoNames[currentWeaponAmmo],
                             },
@@ -63,7 +51,7 @@ function StartHoldingWeapon(weapon, weaponData, weaponItemData)
                             local r, g, b = GetVehicleColor(trajectory.entity)
                             table.insert(LOCAL_CACHED_EVIDENCE, {
                                 type = 'paint_fragment',
-                                route = LocalPlayer.state.currentRoute,
+                                route = plsr.State.flags.currentRoute,
                                 coords = trajectory.endCoords,
                                 data = {
                                     color = { r = r, g = g, b = b },
@@ -74,14 +62,12 @@ function StartHoldingWeapon(weapon, weaponData, weaponItemData)
                             local rand = math.random(20, 75)
                             table.insert(LOCAL_CACHED_EVIDENCE, {
                                 type = 'projectile',
-                                route = LocalPlayer.state.currentRoute,
+                                route = plsr.State.flags.currentRoute,
                                 coords = trajectory.endCoords,
                                 data = {
                                     weapon = {
                                         name = currentWeapon,
-                                        serial = currentWeaponData.serial or 
-                                            currentWeaponData.SerialNumber or
-                                            currentWeaponData.ScratchedSerialNumber,
+                                        serial = currentWeaponData.MetaData.SerialNumber or currentWeaponData.MetaData.ScratchedSerialNumber,
                                         ammoType = currentWeaponAmmo,
                                         ammoTypeName = _ammoNames[currentWeaponAmmo],
                                     },
@@ -114,7 +100,7 @@ function GetBulletTrajectory(maxDist)
     local direction = rotationToDirection(camRotation)
     local targetCoords = originCoords + (direction * maxDist)
 
-    local castedRay = StartExpensiveSynchronousShapeTestLosProbe(originCoords, targetCoords, -1, LocalPlayer.state.ped, 4)
+    local castedRay = StartExpensiveSynchronousShapeTestLosProbe(originCoords, targetCoords, -1, PlayerPedId(), 4)
     local _, hitting, endCoords, surfaceNormal, entity = GetShapeTestResult(castedRay)
 
     return {

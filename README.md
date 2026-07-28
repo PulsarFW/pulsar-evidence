@@ -6,12 +6,18 @@
 
 # PULSAR-EVIDENCE
 
-### Forensic evidence — blood, ballistics, DNA, and scene inspection
+### Forensics — DNA collection, ballistics/serial number matching, and evidence inspection
 
 <br/>
 
 ![Lua](https://img.shields.io/badge/Lua_5.4-2C2D72?style=flat-square&logo=lua&logoColor=white)
 ![FiveM](https://img.shields.io/badge/FiveM-F40552?style=flat-square)
+
+<br/>
+
+<sub>Enjoy the framework? A coffee helps keep active development, hardening, and support going.</sub>
+
+<a href="https://buymeacoffee.com/pulsarframework"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;" /></a>
 
 <br/>
 
@@ -23,16 +29,17 @@
 
 ## Overview
 
-Forensic evidence system for Pulsar Framework. Tracks blood splatter, projectile casings, ballistics data, and DNA — allowing law enforcement to collect and inspect evidence at crime scenes.
+DB-backed (direct `oxmysql`) forensics system. `ballistics.lua` runs serial-number matching against a suspect's own weapon inventory (reading the item's `MetaData` directly — it's already a table by the time it reaches here, not a JSON string to decode); `dna.lua` covers DNA sample collection; `inspecting.lua` covers general evidence item inspection.
 
 ---
 
 ## Dependencies
 
-- `pulsar-core` — framework core
-- `pulsar-characters` — job check for evidence collection
-- `ox_inventory` — evidence bag items
-- `ox_lib` — notify, progress
+- `pulsar_core` — framework core
+- `pulsar_inventory` — the weapon/item metadata ballistics checks read
+- `pulsar_police` — the primary consumer, gated to on-duty police
+- `pulsar_pwnzor` — anti-cheat check loaded alongside every resource
+- `oxmysql` — external resource, not part of Pulsar — direct MariaDB access for evidence records
 
 ---
 
